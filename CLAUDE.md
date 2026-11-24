@@ -66,9 +66,8 @@ También sirve como guía para la persona dueña del repo.
 
 ### Estado actual del repo
 
-- La rama principal `main` **todavía no existe**. El trabajo está en la rama
-  `ccr-f1ec6aff-wa7nxl`. Próximo paso sugerido: crear `main` con un pull request,
-  como práctica guiada.
+- La rama `main` **ya existe y es la rama principal** del repositorio. La rama
+  `ccr-f1ec6aff-wa7nxl` fue la de la sesión en la nube y ya se unió a `main`.
 - La cuenta tiene **GitHub Student Developer Pack** (con GitHub Pro) y
   **GitHub Copilot Student** activos.
 
