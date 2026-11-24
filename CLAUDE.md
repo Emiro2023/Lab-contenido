@@ -8,7 +8,7 @@ También sirve como guía para la persona dueña del repo.
 - Es **principiante** en GitHub, git, Claude Code y en las herramientas conectadas
   (Google Drive, Docs, Sheets, Gmail, Calendar, Google One / Gemini, Notion, Canva,
   Adobe, Vercel, WordPress y demás conectores).
-- Trabaja mucho **desde el móvil**.
+- Trabaja **desde el móvil y desde su laptop**. En la laptop usa VS Code con Copilot.
 - Idioma: **español**.
 
 ## Cómo explicar y trabajar con esta persona
@@ -69,6 +69,39 @@ También sirve como guía para la persona dueña del repo.
   como práctica guiada.
 - La cuenta tiene **GitHub Student Developer Pack** (con GitHub Pro) y
   **GitHub Copilot Student** activos.
+
+## Copilot + Claude Code: cómo trabajan juntos
+
+Copilot lee `.github/copilot-instructions.md`; Claude Code lee este archivo.
+Si cambia una regla importante, actualizar **los dos** archivos.
+
+### Qué hace cada uno
+
+| Tarea | Herramienta |
+|---|---|
+| Autocompletar código mientras se escribe | Copilot (VS Code) |
+| "¿Qué hace este código?" (seleccionar → Explicar) | Copilot Chat (VS Code) |
+| Arreglo pequeño en un archivo abierto | Copilot (VS Code) |
+| Mensaje de commit sugerido | Copilot (botón ✨ en el panel de git de VS Code) |
+| Resumen y revisión de un pull request | Copilot en GitHub.com |
+| Preguntas rápidas sobre el repo desde el móvil | Copilot en GitHub.com o en la app GitHub |
+| Crear o cambiar varias cosas a la vez, un juego nuevo, una web | Claude Code |
+| Probar en el navegador, sacar capturas, revisar que funcione | Claude Code |
+| Crear issues, ramas y pull requests; publicar | Claude Code |
+| Planear un proyecto y explicar paso a paso | Claude Code |
+
+### Reglas para no pisarse
+
+1. **Issues como lista común**: toda tarea se anota como issue; así ambos la ven.
+2. **Una herramienta por rama a la vez**: si Claude Code trabaja en una rama,
+   no editar esa misma rama en VS Code al mismo tiempo (y al revés).
+3. **Antes de empezar en la laptop**: en VS Code, hacer *Sync / Pull*
+   (traer los últimos cambios de GitHub). **Al terminar**: *Commit* y *Push*.
+4. **Doble revisión**: lo que hace uno, lo puede revisar el otro.
+   Ejemplo: Claude Code abre un pull request → se pide revisión de Copilot en GitHub.
+5. **Copilot como agente** (opcional, más adelante): en GitHub se puede asignar un issue
+   a Copilot y él abre un pull request solo. Usarlo solo con tareas pequeñas y claras,
+   y revisar siempre su pull request antes de unirlo.
 
 ## Cómo organizar las demás herramientas
 
