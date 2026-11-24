@@ -8,7 +8,9 @@ También sirve como guía para la persona dueña del repo.
 - Es **principiante** en GitHub, git, Claude Code y en las herramientas conectadas
   (Google Drive, Docs, Sheets, Gmail, Calendar, Google One / Gemini, Notion, Canva,
   Adobe, Vercel, WordPress y demás conectores).
-- Trabaja **desde el móvil y desde su laptop**. En la laptop usa VS Code con Copilot.
+- Trabaja **desde el móvil y desde su laptop (Windows)**.
+- Tiene: Claude Code, GitHub Copilot Student, **Google Antigravity** (con plan Pro de Google)
+  y VS Code. Editor principal recomendado en la laptop: **Antigravity**.
 - Idioma: **español**.
 
 ## Cómo explicar y trabajar con esta persona
@@ -70,10 +72,22 @@ También sirve como guía para la persona dueña del repo.
 - La cuenta tiene **GitHub Student Developer Pack** (con GitHub Pro) y
   **GitHub Copilot Student** activos.
 
-## Copilot + Claude Code: cómo trabajan juntos
+## Claude Code + Antigravity + Copilot: cómo trabajan juntos
 
 Copilot lee `.github/copilot-instructions.md`; Claude Code lee este archivo.
-Si cambia una regla importante, actualizar **los dos** archivos.
+En Antigravity, añadir una regla que diga que siga `CLAUDE.md`.
+Si cambia una regla importante, actualizar estos archivos.
+
+### Un papel para cada herramienta (para no confundirse)
+
+1. **Laptop → Antigravity** (editor + agentes de Gemini). Un solo editor:
+   no usar VS Code y Antigravity a la vez.
+2. **Tareas grandes, en la nube o desde el móvil → Claude Code.**
+3. **GitHub.com y app GitHub → Copilot**: revisar pull requests, preguntas rápidas.
+4. **GitHub es el centro**: todo se guarda allí, se trabaje con la herramienta que sea.
+
+La tabla de abajo nombra VS Code; en la laptop, lo mismo aplica a Antigravity
+(autocompletar, explicar código, arreglos pequeños) usando su agente de Gemini.
 
 ### Qué hace cada uno
 
@@ -94,8 +108,8 @@ Si cambia una regla importante, actualizar **los dos** archivos.
 
 1. **Issues como lista común**: toda tarea se anota como issue; así ambos la ven.
 2. **Una herramienta por rama a la vez**: si Claude Code trabaja en una rama,
-   no editar esa misma rama en VS Code al mismo tiempo (y al revés).
-3. **Antes de empezar en la laptop**: en VS Code, hacer *Sync / Pull*
+   no editar esa misma rama en Antigravity o VS Code al mismo tiempo (y al revés).
+3. **Antes de empezar en la laptop**: en el editor, hacer *Sync / Pull*
    (traer los últimos cambios de GitHub). **Al terminar**: *Commit* y *Push*.
 4. **Doble revisión**: lo que hace uno, lo puede revisar el otro.
    Ejemplo: Claude Code abre un pull request → se pide revisión de Copilot en GitHub.
