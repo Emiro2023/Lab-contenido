@@ -39,7 +39,12 @@
     font-size: clamp(1.3rem, 4vw, 1.7rem); letter-spacing: 0.01em;
   }
   h1 span { color: var(--idea); }
-  .stats { display: flex; gap: 14px; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+  .stats { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+  button.mini {
+    font-family: var(--font-body); font-weight: 600; font-size: 0.8rem; padding: 3px 12px;
+    background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px rgba(154,166,196,0.4);
+  }
+  button.mini[aria-pressed="true"] { color: var(--idea); }
   .stat b { font-family: var(--font-display); font-size: 1.15rem; color: var(--paper); }
   .stat { color: var(--muted); }
   .lives { color: var(--spam); letter-spacing: 2px; }
@@ -75,8 +80,10 @@
   <div class="stats" aria-live="polite">
     <div class="stat">Puntos <b id="score">0</b></div>
     <div class="stat">Racha <b id="combo">x1</b></div>
+    <div class="stat">Nivel <b id="level">1</b></div>
     <div class="stat">Récord <b id="best">0</b></div>
     <div class="stat lives" id="lives" aria-label="Vidas">♥♥♥</div>
+    <button id="sound" class="mini" type="button" aria-pressed="true">Sonido: sí</button>
   </div>
 </header>
 
@@ -94,7 +101,7 @@
   </div>
 </div>
 
-<footer>Mueve con <kbd>←</kbd> <kbd>→</kbd>, con el ratón o arrastrando el dedo · <kbd>P</kbd> pausa</footer>
+<footer>Mueve con <kbd>←</kbd> <kbd>→</kbd>, con el ratón o arrastrando el dedo · <kbd>P</kbd> pausa · <kbd>M</kbd> sonido</footer>
 
 <script>
 (() => {
@@ -133,6 +140,37 @@
   let items = [], sparks = [], stars = [];
   let state = 'menu', score = 0, combo = 1, lives = 3, best = store.get();
   let elapsed = 0, spawnTimer = 0, last = 0, flash = 0;
+  let level = 1, banner = 0;
+
+  // ---- sonido (Web Audio, sin archivos) ----
+  let audio = null, soundOn = true;
+  try { soundOn = localStorage.getItem('lluvia-sound') !== 'off'; } catch {}
+  function initAudio() {
+    if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }
+    if (audio && audio.state === 'suspended') audio.resume();
+  }
+  function beep(freq, dur = 0.09, type = 'sine', vol = 0.12, slideTo = 0, delay = 0) {
+    if (!soundOn || !audio) return;
+    const t = audio.currentTime + delay;
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur + 0.02);
+  }
+  const soundBtn = $('sound');
+  function renderSound() {
+    soundBtn.textContent = 'Sonido: ' + (soundOn ? 'sí' : 'no');
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+  }
+  function toggleSound() {
+    soundOn = !soundOn;
+    try { localStorage.setItem('lluvia-sound', soundOn ? 'on' : 'off'); } catch {}
+    if (soundOn) { initAudio(); beep(660); }
+    renderSound();
+  }
+  soundBtn.addEventListener('click', () => { toggleSound(); soundBtn.blur(); });
+  renderSound();
 
   function makeStars() {
     stars = Array.from({ length: 50 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.3 + 0.3, t: Math.random() * 6 }));
@@ -142,12 +180,14 @@
     $('score').textContent = score;
     $('combo').textContent = 'x' + combo;
     $('best').textContent = best;
+    $('level').textContent = level;
     $('lives').textContent = '♥'.repeat(lives) + '♡'.repeat(Math.max(0, 3 - lives));
   }
 
   function start() {
     items = []; sparks = [];
     score = 0; combo = 1; lives = 3; elapsed = 0; spawnTimer = 0;
+    level = 1; banner = 0; initAudio();
     player.x = W / 2; player.target = null;
     state = 'playing'; overlay.hidden = true;
     updateHud(); last = performance.now();
@@ -163,8 +203,9 @@
     const record = score > best;
     if (record) { best = score; store.set(best); }
     updateHud();
+    beep(392, 0.15, 'triangle'); beep(330, 0.15, 'triangle', 0.12, 0, 0.15); beep(262, 0.35, 'triangle', 0.12, 0, 0.3);
     showOverlay(record ? '¡Nuevo récord!' : 'Se acabó la lluvia',
-      `Hiciste ${score} puntos${record ? '. Es tu mejor marca.' : `. Tu récord es ${best}.`}`, 'Jugar otra vez');
+      `Llegaste al nivel ${level} con ${score} puntos${record ? '. Es tu mejor marca.' : `. Tu récord es ${best}.`}`, 'Jugar otra vez');
   }
 
   function togglePause() {
@@ -173,13 +214,13 @@
   }
 
   function spawn() {
-    const level = Math.min(elapsed / 60, 1); // dificultad 0..1 en el primer minuto
+    const diff = Math.min((level - 1) / 5, 1); // dificultad 0..1, al máximo en el nivel 6
     const r = Math.random();
-    const type = r < 0.07 ? 'gold' : r < 0.07 + 0.22 + level * 0.18 ? 'spam' : 'idea';
+    const type = r < 0.07 ? 'gold' : r < 0.07 + 0.22 + diff * 0.18 ? 'spam' : 'idea';
     const size = type === 'gold' ? 11 : 13;
     items.push({
       type, x: size + Math.random() * (W - size * 2), y: -20, r: size,
-      vy: 130 + level * 170 + Math.random() * 60, rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 3,
+      vy: 130 + diff * 190 + Math.random() * 60, rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 3,
     });
   }
 
@@ -193,6 +234,13 @@
 
   function update(dt) {
     elapsed += dt;
+    // un nivel nuevo cada 20 segundos
+    const newLevel = 1 + Math.floor(elapsed / 20);
+    if (newLevel > level) {
+      level = newLevel; banner = 1.6; updateHud();
+      beep(523, 0.1, 'triangle'); beep(659, 0.1, 'triangle', 0.12, 0, 0.1); beep(784, 0.2, 'triangle', 0.12, 0, 0.2);
+    }
+    banner = Math.max(0, banner - dt);
     // movimiento del jugador
     if (keys.left || keys.right) player.target = null;
     if (player.target !== null) {
@@ -214,11 +262,14 @@
         it.done = true;
         if (it.type === 'spam') {
           lives--; combo = 1; flash = 0.25; burst(it.x, it.y, C.spam, 16);
+          beep(180, 0.25, 'sawtooth', 0.1, 70);
           if (lives <= 0) { updateHud(); gameOver(); return; }
         } else {
           score += (it.type === 'gold' ? 5 : 1) * combo;
           combo = Math.min(combo + 1, 8);
           burst(it.x, it.y, it.type === 'gold' ? C.gold : C.idea);
+          if (it.type === 'gold') { beep(880, 0.08, 'triangle'); beep(1320, 0.14, 'triangle', 0.12, 0, 0.07); }
+          else beep(440 + combo * 55, 0.08); // la nota sube con la racha
         }
         updateHud();
       } else if (!it.done && it.y - it.r > H) {
@@ -292,6 +343,11 @@
     for (const s of sparks) { ctx.globalAlpha = Math.max(0, s.life * 2); ctx.fillStyle = s.color; ctx.fillRect(s.x - 2, s.y - 2, 4, 4); }
     ctx.globalAlpha = 1;
     drawPlayer();
+    if (banner > 0) {
+      ctx.globalAlpha = Math.min(1, banner); ctx.fillStyle = C.idea; ctx.textAlign = 'center';
+      ctx.font = '700 34px Fredoka, "Trebuchet MS", sans-serif';
+      ctx.fillText('Nivel ' + level, W / 2, H * 0.4); ctx.globalAlpha = 1;
+    }
     if (flash > 0) { ctx.fillStyle = C.spam; ctx.globalAlpha = flash; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   }
 
@@ -307,6 +363,7 @@
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
     if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') togglePause();
+    if (e.key === 'm' || e.key === 'M') toggleSound();
     if ((e.key === 'Enter' || e.key === ' ') && state !== 'playing' && document.activeElement !== playBtn) { e.preventDefault(); playBtn.click(); }
   });
   addEventListener('keyup', e => {
